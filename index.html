@@ -50,13 +50,13 @@
         .font-semibold { font-weight: 600; }
         .font-bold { font-weight: 700; color: white;}
         .text-gray-600 { color: #e9e9e9; }
-        .text-gray-700 { color: #374151; }
+        .text-gray-700 { color: #F5CB42; }
         .text-gray-900 { color: #dddddd; }
         .text-red-600 { color: #F5CB42; }
         .text-red-700 { color: #F5CB42; }
-        .text-orange-600 { color: #ea580c; }
-        .text-blue-600 { color: #2563eb; }
-        .text-purple-600 { color: #9333ea; }
+        .text-orange-600 { color: #dc2626; }
+        .text-blue-600 { color: #e9e9e9; }
+        .text-purple-600 { color: #4d9c3b; }
         .text-yellow-800 { color: #78350f; }
         .flex { display: flex; }
         .items-center { align-items: center; }
@@ -91,8 +91,9 @@
                     <label>Tjenestetype</label>
                     <select id="tjenestetype">
                         <option value="Stasjonært vakthold">Stasjonært vakthold</option>
-                        <option value="Patrulje">Patrulje</option>
-                        <option value="Eventvakt">Eventvakt</option>
+                        <option value="Ordensvakthold">Ordensvakthold</option>
+                        <option value="Arrangementvakthold">Arrangementvakthold</option>
+                        <option value="Sentervakthold">Sentervakthold</option>
                     </select>
                 </div>
 
@@ -112,7 +113,7 @@
                     </div>
                     <div id="akuttAlert" class="alert hidden">
                         <div class="alert-text">🚨 Akutt bestilling</div>
-                        <div class="alert-subtext">+200 kr per time (mindre enn 72 timer)</div>
+                        <div class="alert-subtext">+600 kr (mindre enn 72 timer)</div>
                     </div>
                 </div>
 
@@ -134,6 +135,14 @@
                     <p class="text-sm text-gray-600">
                         Beregnet dager: <span class="font-semibold text-gray-900" id="beregnetDager">0</span>
                     </p>
+                </div>
+
+                <div class="mb-8">
+                    <label>Tilleggsinformasjon:</label>
+                    <p class="text-sm text-gray-600">• Natt-tillegg gjelder 21:00-06:00 (+38 kr/t)</p>
+                    <p class="text-sm text-gray-600">• Helge-tillegg gjelder lørdag 18:00 - mandag 06:00 (+68 kr/t)</p>
+                    <p class="text-sm text-gray-600">• Begge tillegg kan påløpe samtidig</p>
+
                 </div>
 
                 <button class="btn-primary" id="genererBtn">Generer tilbud</button>
@@ -176,19 +185,19 @@
 
                     <div class="bg-yellow-50 p-4 mb-6" style="border-radius: 0.5rem; border: 1px solid #fef08a;">
                         <p class="text-sm text-yellow-800">
-                            💡 Spar penger med rammeavtale: Dette er priser for ad hoc-oppdrag. Kontakt oss for forhandlede priser ved faste avtaler eller høyt volum.
+                            Spar penger med rammeavtale: Prisene som vises er kun estimater. Ta kontakt for en eksakt pris og et tilbud på våre øvrige tjenester.
                         </p>
                     </div>
 
                     <button id="goToBestilling" class="btn-primary mb-4">✓ Send inn bestilling på dette</button>
 
                     <div style="display: flex; align-items: center; justify-content: center; color: #4b5563;">
-                        <span class="text-sm">📞 Ring oss: +47 123 45 678</span>
+                        <span class="text-sm">📞 <a href="tel:+4740848176" style="color: white;">Ring oss: +47 408 48 176</a></span>
                     </div>
                 </div>
             </div>
 
-            <div id="placeholder" class="card" style="display: flex; align-items: center; justify-content: center; min-height: 24rem;">
+            <div id="placeholder" class="card" style="display: flex; align-items: center; justify-content: center; max-height: 24rem;">
                 <p class="placeholder-text">Fyll ut skjemaet for å se prisestimat</p>
             </div>
         </div>
@@ -206,24 +215,28 @@
                 <form id="foresporselForm" action="https://formspree.io/f/mqavdqdw" method="POST">
                     <div class="mb-8">
                         <label>Kundetype</label>
-                        <div class="checkbox-group">
-                            <input type="radio" id="ktBedrift" name="Kundetype" value="Bedrift" checked>
-                            <label for="ktBedrift">Bedrift</label>
-                            <input type="radio" id="ktPrivat" name="Kundetype" value="Privat" style="margin-left:1rem;">
-                            <label for="ktPrivat">Privat person</label>
-                        </div>
+<div class="checkbox-group" style="display: flex; gap: 2rem; margin-top: 0.5rem;">
+    <div style="display: flex; align-items: center;">
+        <input type="radio" id="ktBedrift" name="Kundetype" value="Bedrift" checked style="width: 1.2rem; height: 1.2rem; cursor: pointer; accent-color: #F5CB42;">
+        <label for="ktBedrift" style="margin: 0; margin-left: 0.5rem; font-weight: normal; cursor: pointer;">Bedrift</label>
+    </div>
+    <div style="display: flex; align-items: center;">
+        <input type="radio" id="ktPrivat" name="Kundetype" value="Privat" style="width: 1.2rem; height: 1.2rem; cursor: pointer; accent-color: #F5CB42;">
+        <label for="ktPrivat" style="margin: 0; margin-left: 0.5rem; font-weight: normal; cursor: pointer;">Privat person</label>
+    </div>
+</div>
                     </div>
 
                     <div id="bedriftFields" class="mb-8">
-                        <label>Bedriftsinformasjon</label>
+                        <label>Bedriftsinformasjon *</label>
                         <div class="mb-2">
                             <input id="firmaNavn" name="Bedriftsnavn" placeholder="Skriv inn bedriftsnavn">
                         </div>
                         <div class="mb-2">
-                            <input id="orgnr" name="Organisasjonsnummer" placeholder="123 456 789">
+                            <input id="orgnr" type="number"name="Organisasjonsnummer" placeholder="Organisasjonsnummer">
                         </div>
                         <div class="mb-2">
-                            <input id="firmaAdresse" name="Bedriftsadresse" placeholder="Gate 1, 0123 Oslo">
+                            <input id="firmaAdresse" name="Bedriftsadresse" placeholder="firmaAdresse">
                         </div>
                     </div>
 
@@ -233,7 +246,7 @@
                     </div>
 
                     <div class="mb-8">
-                        <label>Kontaktperson</label>
+                        <label>Kontaktperson *</label>
                         <div class="mb-2">
                             <input id="kontaktNavn" name="Navn" placeholder="Fornavn Etternavn" required>
                         </div>
@@ -243,7 +256,7 @@
                         </div>
                         <div class="checkbox-group" style="margin-top:1rem;">
                             <input type="checkbox" id="samtykke">
-                            <label for="samtykke">Jeg samtykker til at dere kontakter meg på oppgitt telefonnummer og e-post angående denne forespørselen.</label>
+                            <label for="samtykke">Jeg samtykker til at dere kontakter meg på oppgitt telefonnummer eller e-post angående denne forespørselen.</label>
                         </div>
                     </div>
 
@@ -278,14 +291,15 @@
                     <p class="text-sm text-gray-600" id="step2_inkludertMva">0 kr inkl. mva (25%)</p>
                 </div>
 
-                <div class="mb-6 p-4" style="border-radius: 0.5rem; background-color:#1f1f1f;">
+                <div class="mb-6 p-4" style="border-radius: 0.5rem; background-color:#242424;">
                     <h3>Juster parametere</h3>
                     <div class="mb-4">
                         <label>Tjeneste</label>
                         <select id="step2_tjenestetype">
                             <option value="Stasjonært vakthold">Stasjonært vakthold</option>
-                            <option value="Patrulje">Patrulje</option>
-                            <option value="Eventvakt">Eventvakt</option>
+                            <option value="Ordensvakthold">Ordensvakthold</option>
+                            <option value="Arrangementvakthold">Arrangementvakthold</option>
+                            <option value="Sentervakthold">Sentervakthold</option>
                         </select>
                     </div>
                     <div class="mb-4">
@@ -342,9 +356,10 @@
 
     <script>
         const priser = {
-            'Stasjonært vakthold': { grunnpris: 560, nattTillegg: 80, helgTillegg: 140 },
-            'Patrulje': { grunnpris: 650, nattTillegg: 100, helgTillegg: 160 },
-            'Eventvakt': { grunnpris: 600, nattTillegg: 90, helgTillegg: 150 }
+            'Stasjonært vakthold': { grunnpris: 450, nattTillegg: 38, helgTillegg: 68 },
+            'Ordensvakthold': { grunnpris: 490, nattTillegg: false, helgTillegg: false },
+            'Arrangementvakthold': { grunnpris: 490, nattTillegg: false, helgTillegg: false },
+            'Sentervakthold': { grunnpris: 450, nattTillegg: 38, helgTillegg: 68 },
         };
 
         const elements = {
@@ -440,7 +455,7 @@
             const nattOgHelge = beregnnattOgHelge();
 
             const grunnpris = prisStruktur.grunnpris * totalTimer;
-            const akuttKr = erAkutt ? (200 * totalTimer) : 0;
+            const akuttKr = erAkutt ? (600) : 0;
             const nattKr = prisStruktur.nattTillegg * nattOgHelge.nattTimer * antalVektere;
             const helgeKr = prisStruktur.helgTillegg * nattOgHelge.helgeTimer * antalVektere;
 
@@ -458,7 +473,7 @@
             if (erAkutt) {
                 detaljer += `
                     <div class="row">
-                        <span class="text-orange-600">Akutt oppdrag-tillegg (${totalTimer.toFixed(1)} timer × 200 kr/time):</span>
+                        <span class="text-orange-600">Akutt oppdrag-tillegg:</span>
                         <span class="row-value text-orange-600">+${akuttKr.toLocaleString('nb-NO')} kr</span>
                     </div>
                 `;
@@ -492,13 +507,14 @@
 
             elements.prisestimat.classList.remove('hidden');
             elements.placeholder.classList.add('hidden');
+            elements.placeholder.style.display = 'none';
         }
 
         function step2Beregn(values) {
             const prisStruktur = priser[values.tjenestetype];
             const totalTimer = values.timer * values.antalVektere;
             const grunnpris = prisStruktur.grunnpris * totalTimer;
-            const akuttKr = values.erAkutt ? (200 * totalTimer) : 0;
+            const akuttKr = values.erAkutt ? (600) : 0;
             const nattKr = prisStruktur.nattTillegg * values.nattTimer * values.antalVektere;
             const helgeKr = prisStruktur.helgTillegg * values.helgeTimer * values.antalVektere;
             const subtotal = grunnpris + akuttKr + nattKr + helgeKr;
@@ -576,14 +592,14 @@
             const calc = step2Beregn(v);
             let detaljer = `
                 <div class="row">
-                    <span class="text-gray-700">Grunnpris (${v.timer.toFixed(1)} timer × ${v.antalVektere} vakter × ${priser[v.tjenestetype].grunnpris} kr/time):</span>
+                    <span class="text-gray-700">Grunnpris (${v.timer.toFixed(1)} timer × ${v.antalVektere} vektere × ${priser[v.tjenestetype].grunnpris} kr/time):</span>
                     <span class="row-value text-gray-900">${calc.grunnpris.toLocaleString('nb-NO')} kr</span>
                 </div>
             `;
             if (v.erAkutt) {
                 detaljer += `
                     <div class="row">
-                        <span class="text-orange-600">Akutt oppdrag-tillegg (${(v.timer * v.antalVektere).toFixed(1)} timer × 200 kr/time):</span>
+                        <span class="text-orange-600">Akutt oppdrag-tillegg:</span>
                         <span class="row-value text-orange-600">+${calc.akuttKr.toLocaleString('nb-NO')} kr</span>
                     </div>
                 `;
@@ -591,7 +607,7 @@
             if (v.nattTimer > 0) {
                 detaljer += `
                     <div class="row">
-                        <span class="text-blue-600">Natt-tillegg (${v.nattTimer.toFixed(1)} timer × ${v.antalVektere} vakter × ${priser[v.tjenestetype].nattTillegg} kr/time):</span>
+                        <span class="text-blue-600">Natt-tillegg (${v.nattTimer.toFixed(1)} timer × ${v.antalVektere} vektere × ${priser[v.tjenestetype].nattTillegg} kr/time):</span>
                         <span class="row-value text-blue-600">+${calc.nattKr.toLocaleString('nb-NO')} kr</span>
                     </div>
                 `;
@@ -599,7 +615,7 @@
             if (v.helgeTimer > 0) {
                 detaljer += `
                     <div class="row">
-                        <span class="text-purple-600">Helge-tillegg (${v.helgeTimer.toFixed(1)} timer × ${v.antalVektere} vakter × ${priser[v.tjenestetype].helgTillegg} kr/time):</span>
+                        <span class="text-purple-600">Helge-tillegg (${v.helgeTimer.toFixed(1)} timer × ${v.antalVektere} vektere × ${priser[v.tjenestetype].helgTillegg} kr/time):</span>
                         <span class="row-value text-purple-600">+${calc.helgeKr.toLocaleString('nb-NO')} kr</span>
                     </div>
                 `;
