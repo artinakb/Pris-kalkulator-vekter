@@ -1,0 +1,354 @@
+<!DOCTYPE html>
+<html lang="no">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vakt Tilbud Generator</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background-color: black; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', sans-serif; color: #111827; }
+        .container { max-width: 60rem; margin: 0 auto; padding: 0.5rem; }
+        .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; }
+        @media (max-width: 1024px) { .grid { grid-template-columns: 1fr; } }
+        @media (max-width: 1024px) {
+    .grid {
+        width: 100% !important;
+        max-width: 100% !important;
+        margin: 0 auto !important;
+    }
+
+    .card {
+        width: 100% !important;
+        max-width: 100% !important;
+    }
+}
+        .card { background: #252525; border-radius: 0.5rem; padding: 2rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); border: 1px solid black; }
+        h1 { font-size: 1.875rem; font-weight: bold; color: white; margin-bottom: 2rem; }
+        h2 { font-size: 1.875rem; font-weight: bold; color: #F5CB42; margin-bottom: 0.5rem; }
+        h3 { font-weight: 600; margin-bottom: 1rem; color: #e9e9e9;}
+        label { display: block; font-size: 0.875rem; font-weight: 600; color: white; margin-bottom: 0.75rem; }
+        input, select { width: 100%; padding: 0.75rem 1rem; border: 1px solid #1f1f1f; border-radius: 0.5rem; font-size: 1rem; color: white; background-color: #1f1f1f; }
+        input:focus, select:focus { outline: none; box-shadow: 0 0 0 2px #F5CB42; }
+        button { width: 100%; padding: 0.75rem; border-radius: 0.5rem; font-weight: 600; border: none; cursor: pointer; transition: all 0.2s; }
+        .btn-primary { background-color: #F5CB42; color: white; font-size: 1rem; }
+        .btn-primary:hover { background-color: #F5CB42; }
+        .btn-primary:disabled { background-color: #d1d5db; cursor: not-allowed; }
+        .grid-cols-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+        .mb-2 { margin-bottom: 0.5rem; }
+        .mb-4 { margin-bottom: 1rem; }
+        .mb-6 { margin-bottom: 1.5rem; }
+        .mb-8 { margin-bottom: 2rem; }
+        .p-4 { padding: 1rem; }
+        .bg-gray-50 { background-color: #f9fafb; }
+        .bg-red-50 { background-color: #fef2f2; }
+        .bg-yellow-50 { background-color: #fffbeb; }
+        .border-t { border-top: 1px solid #e5e7eb; }
+        .pt-4 { padding-top: 1rem; }
+        .pt-6 { padding-top: 1.5rem; }
+        .text-sm { font-size: 0.875rem; color: white;}
+        .text-xs { font-size: 0.75rem; }
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; color: white;}
+        .text-gray-600 { color: #e9e9e9; }
+        .text-gray-700 { color: #374151; }
+        .text-gray-900 { color: #dddddd; }
+        .text-red-600 { color: #F5CB42; }
+        .text-red-700 { color: #F5CB42; }
+        .text-orange-600 { color: #ea580c; }
+        .text-blue-600 { color: #2563eb; }
+        .text-purple-600 { color: #9333ea; }
+        .text-yellow-800 { color: #78350f; }
+        .flex { display: flex; }
+        .items-center { align-items: center; }
+        .gap-3 { gap: 0.75rem; }
+        .justify-between { justify-content: space-between; }
+        .border-red-300 { border: 1px solid #fca5a5; }
+        .border-yellow-200 { border: 1px solid #fef08a; }
+        .rounded-lg { border-radius: 0.5rem; }
+        input[type="checkbox"] { width: 1rem; height: 1rem; margin-right: 0.75rem; cursor: pointer; }
+        .sticky { position: sticky; top: 1.5rem; }
+        .placeholder-text { text-align: center; color: #9ca3af; }
+        .alert { padding: 1rem; border-radius: 0.5rem; border: 1px solid #fca5a5; background-color: #fef2f2; margin-bottom: 1.5rem; }
+        .alert-text { font-weight: 600; color: #b91c1c; margin-bottom: 0.25rem; }
+        .alert-subtext { font-size: 0.875rem; color: #dc2626; }
+        .hidden { display: none; }
+        .space { margin-top: 0.75rem; }
+        .row { display: flex; justify-content: space-between; font-size: 0.875rem; margin-top: 0.75rem; }
+        .row-label { }
+        .row-value { font-weight: 600; }
+        .checkbox-group { display: flex; align-items: center; margin-top: 0.5rem; }
+        .checkbox-group label { margin: 0; margin-left: 0.75rem; font-weight: normal; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="grid">
+            <!-- LEFT SIDE -->
+            <div class="card">
+                <h1>Konfigurer oppdrag</h1>
+                
+                <div class="mb-8">
+                    <label>Tjenestetype</label>
+                    <select id="tjenestetype">
+                        <option value="Stasjonært vakthold">Stasjonært vakthold</option>
+                        <option value="Patrulje">Patrulje</option>
+                        <option value="Eventvakt">Eventvakt</option>
+                    </select>
+                </div>
+
+                <div class="mb-8">
+                    <label>Antall vektere</label>
+                    <input type="number" id="antalVektere" value="1" min="1">
+                </div>
+
+                <div class="mb-2">
+                    <label>Start dato - Start tid</label>
+                    <div class="grid-cols-2">
+                        <input type="date" id="startDato">
+                        <div>
+                            <label class="text-xs" style="margin-bottom: 0.25rem;">Fra</label>
+                            <input type="time" id="startTid" value="12:30">
+                        </div>
+                    </div>
+                    <div id="akuttAlert" class="alert hidden">
+                        <div class="alert-text">🚨 Akutt bestilling</div>
+                        <div class="alert-subtext">+200 kr per time (mindre enn 72 timer)</div>
+                    </div>
+                </div>
+
+                <div class="mb-8">
+                    <label>Slutt dato - Slutt tid</label>
+                    <div class="grid-cols-2">
+                        <input type="date" id="sluttDato">
+                        <div>
+                            <label class="text-xs" style="margin-bottom: 0.25rem;">Til</label>
+                            <input type="time" id="sluttTid" value="12:30">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mb-8 p-4 bg-gray-50" style="border-radius: 0.5rem; background-color: #1f1f1f;">
+                    <p class="text-sm text-gray-600 mb-2">
+                        Beregnet timer: <span class="font-semibold text-gray-900" id="beregnetTimer">0</span>
+                    </p>
+                    <p class="text-sm text-gray-600">
+                        Beregnet dager: <span class="font-semibold text-gray-900" id="beregnetDager">0</span>
+                    </p>
+                </div>
+
+                <button class="btn-primary" id="genererBtn">Generer tilbud</button>
+            </div>
+
+            <!-- RIGHT SIDE -->
+            <div id="prisestimat" class="hidden sticky">
+                <div class="card">
+                    <h2>Prisestimat</h2>
+                    
+                    <div class="mb-8">
+                        <p style="font-size: 3rem; font-weight: bold; color: white; margin-bottom: 0.5rem;" id="hovedpris">0 kr</p>
+                        <p class="text-sm text-gray-600">eks. mva</p>
+                        <p class="text-sm text-gray-600" id="inkludertMva">0 kr inkl. mva (25%)</p>
+                    </div>
+
+                    <div class="border-t pt-6">
+                        <h3>Detaljert prisberegning:</h3>
+                        
+                        <div id="prisDetaljer"></div>
+
+                        <div class="border-t pt-4 mb-4">
+                            <div class="row">
+                                <span class ="text-gray-900">Subtotal (eks. mva):</span>
+                                <span class="row-value text-gray-900" id="subtotal">0 kr</span>
+                            </div>
+                            <div class="row">
+                                <span class ="text-gray-900">MVA (25%):</span>
+                                <span class="row-value text-gray-900" id="mva">0 kr</span>
+                            </div>
+
+                            <div class="border-t pt-4">
+                                <div style="display: flex; justify-content: space-between;">
+                                    <span class="font-bold">Total inkl. mva:</span>
+                                    <span style="font-weight: bold; font-size: 1.125rem; color: #F5CB42;" id="total">0 kr</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="bg-yellow-50 p-4 mb-6" style="border-radius: 0.5rem; border: 1px solid #fef08a;">
+                        <p class="text-sm text-yellow-800">
+                            💡 Spar penger med rammeavtale: Dette er priser for ad hoc-oppdrag. Kontakt oss for forhandlede priser ved faste avtaler eller høyt volum.
+                        </p>
+                    </div>
+
+                    <button class="btn-primary mb-4">✓ Send inn bestilling på dette</button>
+
+                    <div style="display: flex; align-items: center; justify-content: center; color: #4b5563;">
+                        <span class="text-sm">📞 Ring oss: +47 123 45 678</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="placeholder" class="card" style="display: flex; align-items: center; justify-content: center; min-height: 24rem;">
+                <p class="placeholder-text">Fyll ut skjemaet for å se prisestimat</p>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const priser = {
+            'Stasjonært vakthold': { grunnpris: 560, nattTillegg: 80, helgTillegg: 140 },
+            'Patrulje': { grunnpris: 650, nattTillegg: 100, helgTillegg: 160 },
+            'Eventvakt': { grunnpris: 600, nattTillegg: 90, helgTillegg: 150 }
+        };
+
+        const elements = {
+            tjenestetype: document.getElementById('tjenestetype'),
+            antalVektere: document.getElementById('antalVektere'),
+            startDato: document.getElementById('startDato'),
+            startTid: document.getElementById('startTid'),
+            sluttDato: document.getElementById('sluttDato'),
+            sluttTid: document.getElementById('sluttTid'),
+            genererBtn: document.getElementById('genererBtn'),
+            akuttAlert: document.getElementById('akuttAlert'),
+            prisestimat: document.getElementById('prisestimat'),
+            placeholder: document.getElementById('placeholder'),
+            beregnetTimer: document.getElementById('beregnetTimer'),
+            beregnetDager: document.getElementById('beregnetDager'),
+            prisDetaljer: document.getElementById('prisDetaljer')
+        };
+
+        function beregntimer() {
+            if (!elements.startDato.value || !elements.sluttDato.value) return 0;
+            const start = new Date(`${elements.startDato.value}T${elements.startTid.value}`);
+            const slutt = new Date(`${elements.sluttDato.value}T${elements.sluttTid.value}`);
+            return Math.max(0, (slutt - start) / (1000 * 60 * 60));
+        }
+
+        function beregndager() {
+            if (!elements.startDato.value || !elements.sluttDato.value) return 0;
+            const start = new Date(elements.startDato.value);
+            const slutt = new Date(elements.sluttDato.value);
+            return Math.max(1, (slutt - start) / (1000 * 60 * 60 * 24) + 1);
+        }
+
+        function erAkuttBestilling() {
+            if (!elements.startDato.value || !elements.startTid.value) return false;
+            const na = new Date();
+            const start = new Date(`${elements.startDato.value}T${elements.startTid.value}:00`);
+            const timerFrem = (start - na) / (1000 * 60 * 60);
+            return timerFrem < 72 && timerFrem > 0;
+        }
+
+        function beregnnattOgHelge() {
+            if (!elements.startDato.value || !elements.sluttDato.value) return { nattTimer: 0, helgeTimer: 0 };
+            let nattTimer = 0, helgeTimer = 0;
+            const start = new Date(`${elements.startDato.value}T${elements.startTid.value}`);
+            const slutt = new Date(`${elements.sluttDato.value}T${elements.sluttTid.value}`);
+            let current = new Date(start);
+            while (current < slutt) {
+                const nextHour = new Date(current);
+                nextHour.setHours(nextHour.getHours() + 1);
+                const endOfThisHour = nextHour > slutt ? slutt : nextHour;
+                const hour = current.getHours();
+                const dayOfWeek = current.getDay();
+                if (hour >= 21 || hour < 6) nattTimer += (endOfThisHour - current) / (1000 * 60 * 60);
+                if (dayOfWeek === 0 || dayOfWeek === 6) helgeTimer += (endOfThisHour - current) / (1000 * 60 * 60);
+                current = endOfThisHour;
+            }
+            return { nattTimer, helgeTimer };
+        }
+
+        function oppdater() {
+            const timer = beregntimer();
+            const dager = beregndager();
+            const erAkutt = erAkuttBestilling();
+            
+            elements.beregnetTimer.textContent = timer.toFixed(1);
+            elements.beregnetDager.textContent = Math.ceil(dager);
+            
+            if (erAkutt) {
+                elements.akuttAlert.classList.remove('hidden');
+            } else {
+                elements.akuttAlert.classList.add('hidden');
+            }
+
+            elements.genererBtn.disabled = !elements.startDato.value || !elements.sluttDato.value || timer <= 0;
+        }
+
+        function genererTilbud() {
+            const timer = beregntimer();
+            const dager = beregndager();
+            if (!elements.startDato.value || !elements.sluttDato.value || timer <= 0) return;
+
+            const tjenestetype = elements.tjenestetype.value;
+            const prisStruktur = priser[tjenestetype];
+            const antalVektere = parseInt(elements.antalVektere.value);
+            const totalTimer = timer * antalVektere;
+            const erAkutt = erAkuttBestilling();
+            const nattOgHelge = beregnnattOgHelge();
+
+            const grunnpris = prisStruktur.grunnpris * totalTimer;
+            const akuttKr = erAkutt ? (200 * totalTimer) : 0;
+            const nattKr = prisStruktur.nattTillegg * nattOgHelge.nattTimer * antalVektere;
+            const helgeKr = prisStruktur.helgTillegg * nattOgHelge.helgeTimer * antalVektere;
+
+            const subtotal = grunnpris + akuttKr + nattKr + helgeKr;
+            const mva = subtotal * 0.25;
+            const total = subtotal + mva;
+
+            let detaljer = `
+                <div class="row">
+                    <span class="text-gray-700">Grunnpris (${timer.toFixed(1)} timer × ${antalVektere} vektere × ${prisStruktur.grunnpris} kr/time):</span>
+                    <span class="row-value text-gray-900">${grunnpris.toLocaleString('nb-NO')} kr</span>
+                </div>
+            `;
+
+            if (erAkutt) {
+                detaljer += `
+                    <div class="row">
+                        <span class="text-orange-600">Akutt oppdrag-tillegg (${totalTimer.toFixed(1)} timer × 200 kr/time):</span>
+                        <span class="row-value text-orange-600">+${akuttKr.toLocaleString('nb-NO')} kr</span>
+                    </div>
+                `;
+            }
+
+            if (nattOgHelge.nattTimer > 0) {
+                detaljer += `
+                    <div class="row">
+                        <span class="text-blue-600">Natt-tillegg (${nattOgHelge.nattTimer.toFixed(1)} timer × ${antalVektere} vektere × ${prisStruktur.nattTillegg} kr/time):</span>
+                        <span class="row-value text-blue-600">+${nattKr.toLocaleString('nb-NO')} kr</span>
+                    </div>
+                `;
+            }
+
+            if (nattOgHelge.helgeTimer > 0) {
+                detaljer += `
+                    <div class="row">
+                        <span class="text-purple-600">Helge-tillegg (${nattOgHelge.helgeTimer.toFixed(1)} timer × ${antalVektere} vektere × ${prisStruktur.helgTillegg} kr/time):</span>
+                        <span class="row-value text-purple-600">+${helgeKr.toLocaleString('nb-NO')} kr</span>
+                    </div>
+                `;
+            }
+
+
+            elements.prisDetaljer.innerHTML = detaljer;
+            document.getElementById('hovedpris').textContent = subtotal.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('inkludertMva').textContent = total.toLocaleString('nb-NO') + ' kr inkl. mva (25%)';
+            document.getElementById('subtotal').textContent = subtotal.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('mva').textContent = mva.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('total').textContent = total.toLocaleString('nb-NO') + ' kr';
+
+            elements.prisestimat.classList.remove('hidden');
+            elements.placeholder.classList.add('hidden');
+        }
+
+        elements.startDato.addEventListener('change', oppdater);
+        elements.startTid.addEventListener('change', oppdater);
+        elements.sluttDato.addEventListener('change', oppdater);
+        elements.sluttTid.addEventListener('change', oppdater);
+        elements.genererBtn.addEventListener('click', genererTilbud);
+
+        oppdater();
+    </script>
+</body>
+</html>
