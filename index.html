@@ -153,6 +153,11 @@
 
                 </div>
 
+                <div id="minTimerAlert" class="alert hidden" style="margin-top: 1rem;">
+                    <div class="alert-text">Minimum 3 timer</div>
+                    <div class="alert-subtext">Vaktoppdrag faktureres for minimum 3 timer selv om ønsket varighet er kortere.</div>
+                </div>
+
                 <button class="btn-primary" id="genererBtn">Generer tilbud</button>
             </div>
 
@@ -389,8 +394,57 @@
             bestillingView: document.getElementById('bestillingView'),
             tilbakeBtn: document.getElementById('tilbakeBtn'),
             foresporselForm: document.getElementById('foresporselForm'),
-            sendInnForesporsel: document.getElementById('sendInnForesporsel')
+            sendInnForesporsel: document.getElementById('sendInnForesporsel'),
+            minTimerAlert: document.getElementById('minTimerAlert')
         };
+
+        function pad(n){return String(n).padStart(2,'0')}
+        function todayStr(){ const d = new Date(); return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`; }
+        function nowTimeStr(){ const d = new Date(); return `${pad(d.getHours())}:${pad(d.getMinutes())}`; }
+        function toDate(dateStr, timeStr){ return new Date(`${dateStr}T${timeStr}`); }
+
+        function updateMinConstraints() {
+            const today = todayStr();
+            const nowTime = nowTimeStr();
+            if (elements.startDato) elements.startDato.min = today;
+            if (elements.sluttDato) elements.sluttDato.min = elements.startDato.value || today;
+
+            if (elements.startDato.value === today) {
+                elements.startTid.min = nowTime;
+                if (elements.startTid.value && elements.startTid.value < nowTime) elements.startTid.value = nowTime;
+            } else {
+                elements.startTid.min = '00:00';
+            }
+
+            const sd = elements.startDato.value;
+            const st = elements.startTid.value;
+            const ed = elements.sluttDato.value;
+            const et = elements.sluttTid.value;
+
+            if (ed) {
+                elements.sluttDato.min = sd || today;
+                if (sd && ed === sd) {
+                    if (st) {
+                        elements.sluttTid.min = st;
+                        if (et && et < st) elements.sluttTid.value = st;
+                    }
+                } else if (ed === today) {
+                    elements.sluttTid.min = nowTime;
+                    if (et && et < nowTime) elements.sluttTid.value = nowTime;
+                } else {
+                    elements.sluttTid.min = '00:00';
+                }
+            }
+
+            if (sd && st) {
+                const startDT = toDate(sd, st);
+                const now = new Date();
+                if (startDT < now) {
+                    elements.startDato.value = today;
+                    elements.startTid.value = nowTime;
+                }
+            }
+        }
 
         function beregntimer() {
             if (!elements.startDato.value || !elements.sluttDato.value) return 0;
@@ -437,6 +491,7 @@
             const timer = beregntimer();
             const dager = beregndager();
             const erAkutt = erAkuttBestilling();
+            updateMinConstraints();
             
             elements.beregnetTimer.textContent = timer.toFixed(1);
             elements.beregnetDager.textContent = Math.ceil(dager);
@@ -445,6 +500,14 @@
                 elements.akuttAlert.classList.remove('hidden');
             } else {
                 elements.akuttAlert.classList.add('hidden');
+            }
+
+            if (elements.minTimerAlert) {
+                if (timer > 0 && timer < 3) {
+                    elements.minTimerAlert.classList.remove('hidden');
+                } else {
+                    elements.minTimerAlert.classList.add('hidden');
+                }
             }
 
             elements.genererBtn.disabled = !elements.startDato.value || !elements.sluttDato.value || timer <= 0;
@@ -458,22 +521,27 @@
             const tjenestetype = elements.tjenestetype.value;
             const prisStruktur = priser[tjenestetype];
             const antalVektere = parseInt(elements.antalVektere.value);
-            const totalTimer = timer * antalVektere;
+            const minTimer = 3;
+            const effektiveTimer = Math.max(timer, minTimer);
+            const totalTimer = effektiveTimer * antalVektere;
             const erAkutt = erAkuttBestilling();
             const nattOgHelge = beregnnattOgHelge();
 
             const grunnpris = prisStruktur.grunnpris * totalTimer;
             const akuttKr = erAkutt ? (600) : 0;
-            const nattKr = prisStruktur.nattTillegg * nattOgHelge.nattTimer * antalVektere;
-            const helgeKr = prisStruktur.helgTillegg * nattOgHelge.helgeTimer * antalVektere;
+            const nattTimerEff = (nattOgHelge.nattTimer > 0 && prisStruktur.nattTillegg) ? Math.max(nattOgHelge.nattTimer, minTimer) : 0;
+            const helgeTimerEff = (nattOgHelge.helgeTimer > 0 && prisStruktur.helgTillegg) ? Math.max(nattOgHelge.helgeTimer, minTimer) : 0;
+            const nattKr = (prisStruktur.nattTillegg ? prisStruktur.nattTillegg * nattTimerEff * antalVektere : 0);
+            const helgeKr = (prisStruktur.helgTillegg ? prisStruktur.helgTillegg * helgeTimerEff * antalVektere : 0);
 
             const subtotal = grunnpris + akuttKr + nattKr + helgeKr;
             const mva = subtotal * 0.25;
             const total = subtotal + mva;
 
+            const minApplied = timer > 0 && timer < minTimer;
             let detaljer = `
                 <div class="row">
-                    <span class="text-gray-700">Grunnpris (${timer.toFixed(1)} timer × ${antalVektere} vektere × ${prisStruktur.grunnpris} kr/time):</span>
+                    <span class="text-gray-700">Grunnpris (${effektiveTimer.toFixed(1)} timer × ${antalVektere} vektere × ${prisStruktur.grunnpris} kr/time)${minApplied ? ' (min. 3 t)' : ''}:</span>
                     <span class="row-value text-gray-900">${grunnpris.toLocaleString('nb-NO')} kr</span>
                 </div>
             `;
@@ -490,7 +558,7 @@
             if (nattOgHelge.nattTimer > 0 && prisStruktur.nattTillegg) {
                 detaljer += `
                     <div class="row">
-                        <span class="text-blue-600">Natt-tillegg (${nattOgHelge.nattTimer.toFixed(1)} timer × ${antalVektere} vektere × ${prisStruktur.nattTillegg} kr/time):</span>
+                        <span class="text-blue-600">Natt-tillegg (${nattTimerEff.toFixed(1)} timer × ${antalVektere} vektere × ${prisStruktur.nattTillegg} kr/time)${nattOgHelge.nattTimer < minTimer ? ' (min. 3 t)' : ''}:</span>
                         <span class="row-value text-blue-600">+${nattKr.toLocaleString('nb-NO')} kr</span>
                     </div>
                 `;
@@ -499,7 +567,7 @@
             if (nattOgHelge.helgeTimer > 0 && prisStruktur.helgTillegg) {
                 detaljer += `
                     <div class="row">
-                        <span class="text-purple-600">Helge-tillegg (${nattOgHelge.helgeTimer.toFixed(1)} timer × ${antalVektere} vektere × ${prisStruktur.helgTillegg} kr/time):</span>
+                        <span class="text-purple-600">Helge-tillegg (${helgeTimerEff.toFixed(1)} timer × ${antalVektere} vektere × ${prisStruktur.helgTillegg} kr/time)${nattOgHelge.helgeTimer < minTimer ? ' (min. 3 t)' : ''}:</span>
                         <span class="row-value text-purple-600">+${helgeKr.toLocaleString('nb-NO')} kr</span>
                     </div>
                 `;
@@ -516,11 +584,23 @@
             elements.prisestimat.classList.remove('hidden');
             elements.placeholder.classList.add('hidden');
             elements.placeholder.style.display = 'none';
+
+            // On stacked layout (<=1024px), scroll to the price summary
+            if (window.matchMedia('(max-width: 1024px)').matches) {
+                const target = document.getElementById('prisestimat');
+                if (target) {
+                    requestAnimationFrame(() => {
+                        target.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                    });
+                }
+            }
         }
 
         function step2Beregn(values) {
             const prisStruktur = priser[values.tjenestetype];
-            const totalTimer = values.timer * values.antalVektere;
+            const minTimer = 3;
+            const effektiveTimer = Math.max(values.timer, minTimer);
+            const totalTimer = effektiveTimer * values.antalVektere;
             const grunnpris = prisStruktur.grunnpris * totalTimer;
             const akuttKr = values.erAkutt ? (600) : 0;
             const nattKr = (prisStruktur.nattTillegg && prisStruktur.nattTillegg > 0) ? (prisStruktur.nattTillegg * values.nattTimer * values.antalVektere) : 0;
@@ -528,7 +608,7 @@
             const subtotal = grunnpris + akuttKr + nattKr + helgeKr;
             const mva = subtotal * 0.25;
             const total = subtotal + mva;
-            return { grunnpris, akuttKr, nattKr, helgeKr, subtotal, mva, total };
+            return { grunnpris, akuttKr, nattKr, helgeKr, subtotal, mva, total, effektiveTimer, minApplied: values.timer > 0 && values.timer < minTimer };
         }
 
         function hentStep2Verdier() {
@@ -600,7 +680,7 @@
             const calc = step2Beregn(v);
             let detaljer = `
                 <div class="row">
-                    <span class="text-gray-700">Grunnpris (${v.timer.toFixed(1)} timer × ${v.antalVektere} vektere × ${priser[v.tjenestetype].grunnpris} kr/time):</span>
+                    <span class="text-gray-700">Grunnpris (${calc.effektiveTimer.toFixed(1)} timer × ${v.antalVektere} vektere × ${priser[v.tjenestetype].grunnpris} kr/time)${calc.minApplied ? ' (min. 3 t)' : ''}:</span>
                     <span class="row-value text-gray-900">${calc.grunnpris.toLocaleString('nb-NO')} kr</span>
                 </div>
             `;
@@ -666,6 +746,7 @@
         elements.startTid.addEventListener('change', oppdater);
         elements.sluttDato.addEventListener('change', oppdater);
         elements.sluttTid.addEventListener('change', oppdater);
+        updateMinConstraints();
         elements.genererBtn.addEventListener('click', genererTilbud);
         if (elements.goToBestilling) elements.goToBestilling.addEventListener('click', (e) => { e.preventDefault(); visBestilling(); });
         if (elements.tilbakeBtn) elements.tilbakeBtn.addEventListener('click', (e) => { e.preventDefault(); elements.bestillingView.classList.add('hidden'); elements.kalkulatorView.classList.remove('hidden'); window.scrollTo(0,0); });
