@@ -81,7 +81,7 @@
     </style>
 </head>
 <body>
-    <div class="container">
+    <div id="kalkulatorView" class="container">
         <div class="grid">
             <!-- LEFT SIDE -->
             <div class="card">
@@ -180,7 +180,7 @@
                         </p>
                     </div>
 
-                    <button class="btn-primary mb-4">✓ Send inn bestilling på dette</button>
+                    <button id="goToBestilling" class="btn-primary mb-4">✓ Send inn bestilling på dette</button>
 
                     <div style="display: flex; align-items: center; justify-content: center; color: #4b5563;">
                         <span class="text-sm">📞 Ring oss: +47 123 45 678</span>
@@ -190,6 +190,151 @@
 
             <div id="placeholder" class="card" style="display: flex; align-items: center; justify-content: center; min-height: 24rem;">
                 <p class="placeholder-text">Fyll ut skjemaet for å se prisestimat</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="bestillingView" class="container hidden">
+        <div class="mb-8">
+            <a id="tilbakeBtn" href="#" class="text-sm" style="color:#e9e9e9; text-decoration:none;">← Tilbake til kalkulator</a>
+        </div>
+        <h1>Send forespørsel om tilbud</h1>
+        <p class="text-sm text-gray-600 mb-8">Kontroller prisestimatet og fyll ut kontaktinformasjon for å sende inn forespørselen.</p>
+        <div class="grid">
+            <div class="card">
+                <h2>Kontaktinformasjon</h2>
+                <form id="foresporselForm" action="https://formsubmit.co/bedrift@centralsecurity.no" method="POST">
+                    <div class="mb-8">
+                        <label>Kundetype</label>
+                        <div class="checkbox-group">
+                            <input type="radio" id="ktBedrift" name="Kundetype" value="Bedrift" checked>
+                            <label for="ktBedrift">Bedrift</label>
+                            <input type="radio" id="ktPrivat" name="Kundetype" value="Privat" style="margin-left:1rem;">
+                            <label for="ktPrivat">Privat person</label>
+                        </div>
+                    </div>
+
+                    <div id="bedriftFields" class="mb-8">
+                        <label>Bedriftsinformasjon</label>
+                        <div class="mb-2">
+                            <input id="firmaNavn" name="Bedriftsnavn" placeholder="Skriv inn bedriftsnavn">
+                        </div>
+                        <div class="mb-2">
+                            <input id="orgnr" name="Organisasjonsnummer" placeholder="123 456 789">
+                        </div>
+                        <div class="mb-2">
+                            <input id="firmaAdresse" name="Bedriftsadresse" placeholder="Gate 1, 0123 Oslo">
+                        </div>
+                    </div>
+
+                    <div class="mb-8">
+                        <label>Serviceadresse *</label>
+                        <input id="serviceAdresse" name="Serviceadresse" placeholder="Hvor skal tjenesten utføres?" required>
+                    </div>
+
+                    <div class="mb-8">
+                        <label>Kontaktperson</label>
+                        <div class="mb-2">
+                            <input id="kontaktNavn" name="Navn" placeholder="Fornavn Etternavn" required>
+                        </div>
+                        <div class="grid-cols-2">
+                            <input id="kontaktEpost" type="email" name="E-post" placeholder="din@epost.no" required>
+                            <input id="kontaktTelefon" name="Telefon" placeholder="+47 123 45 678" required>
+                        </div>
+                        <div class="checkbox-group" style="margin-top:1rem;">
+                            <input type="checkbox" id="samtykke">
+                            <label for="samtykke">Jeg samtykker til at dere kontakter meg på oppgitt telefonnummer og e-post angående denne forespørselen.</label>
+                        </div>
+                    </div>
+
+                    <input type="hidden" name="_subject" value="Ny forespørsel fra priskalkulator">
+                    <input type="hidden" name="_template" value="table">
+                    <input type="hidden" name="_captcha" value="false">
+
+                    <input type="hidden" id="hidTjenestetype" name="Tjenestetype">
+                    <input type="hidden" id="hidAntall" name="Antall_vakter">
+                    <input type="hidden" id="hidStart" name="Start">
+                    <input type="hidden" id="hidSlutt" name="Slutt">
+                    <input type="hidden" id="hidTimer" name="Timer">
+                    <input type="hidden" id="hidNatt" name="Natt_timer">
+                    <input type="hidden" id="hidHelg" name="Helge_timer">
+                    <input type="hidden" id="hidGrunnpris" name="Grunnpris">
+                    <input type="hidden" id="hidAkutt" name="Akutt_tillegg">
+                    <input type="hidden" id="hidNattKr" name="Natt_tillegg">
+                    <input type="hidden" id="hidHelgeKr" name="Helge_tillegg">
+                    <input type="hidden" id="hidSubtotal" name="Subtotal">
+                    <input type="hidden" id="hidMva" name="MVA_25">
+                    <input type="hidden" id="hidTotal" name="Total_ink_mva">
+
+                    <button id="sendInnForesporsel" type="submit" class="btn-primary" disabled>Send forespørsel</button>
+                </form>
+            </div>
+
+            <div class="card">
+                <h2>Prissammendrag</h2>
+                <div class="mb-8">
+                    <p style="font-size: 3rem; font-weight: bold; color: white; margin-bottom: 0.5rem;" id="step2_hovedpris">0 kr</p>
+                    <p class="text-sm text-gray-600" id="step2_inkludertMva">0 kr inkl. mva (25%)</p>
+                </div>
+
+                <div class="mb-6 p-4" style="border-radius: 0.5rem; background-color:#1f1f1f;">
+                    <h3>Juster parametere</h3>
+                    <div class="mb-4">
+                        <label>Tjeneste</label>
+                        <select id="step2_tjenestetype">
+                            <option value="Stasjonært vakthold">Stasjonært vakthold</option>
+                            <option value="Patrulje">Patrulje</option>
+                            <option value="Eventvakt">Eventvakt</option>
+                        </select>
+                    </div>
+                    <div class="mb-4">
+                        <label>Antall vakter</label>
+                        <input type="number" id="step2_antalVektere" min="1" value="1">
+                    </div>
+                    <div class="grid-cols-2 mb-2">
+                        <div>
+                            <label class="text-xs" style="margin-bottom: 0.25rem;">Startdato</label>
+                            <input type="date" id="step2_startDato">
+                        </div>
+                        <div>
+                            <label class="text-xs" style="margin-bottom: 0.25rem;">Sluttdato</label>
+                            <input type="date" id="step2_sluttDato">
+                        </div>
+                    </div>
+                    <div class="grid-cols-2">
+                        <div>
+                            <label class="text-xs" style="margin-bottom: 0.25rem;">Starttid</label>
+                            <input type="time" id="step2_startTid" value="12:30">
+                        </div>
+                        <div>
+                            <label class="text-xs" style="margin-bottom: 0.25rem;">Sluttid</label>
+                            <input type="time" id="step2_sluttTid" value="12:30">
+                        </div>
+                    </div>
+                    <p class="text-sm text-gray-600" style="margin-top:0.5rem;">Prisen oppdateres automatisk når du endrer verdiene</p>
+                </div>
+
+                <div id="step2_prisDetaljer"></div>
+                <div class="border-t pt-4 mb-4">
+                    <div class="row">
+                        <span class ="text-gray-900">Subtotal (eks. mva):</span>
+                        <span class="row-value text-gray-900" id="step2_subtotal">0 kr</span>
+                    </div>
+                    <div class="row">
+                        <span class ="text-gray-900">MVA (25%):</span>
+                        <span class="row-value text-gray-900" id="step2_mva">0 kr</span>
+                    </div>
+                    <div class="border-t pt-4">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span class="font-bold">Total inkl. mva:</span>
+                            <span style="font-weight: bold; font-size: 1.125rem; color: #F5CB42;" id="step2_total">0 kr</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-yellow-50 p-4 mb-6" style="border-radius: 0.5rem; border: 1px solid #fef08a;">
+                    <p class="text-sm text-yellow-800">Dette er et estimat. Endelig pris avtales etter nærmere gjennomgang av dine behov.</p>
+                </div>
             </div>
         </div>
     </div>
@@ -214,7 +359,13 @@
             placeholder: document.getElementById('placeholder'),
             beregnetTimer: document.getElementById('beregnetTimer'),
             beregnetDager: document.getElementById('beregnetDager'),
-            prisDetaljer: document.getElementById('prisDetaljer')
+            prisDetaljer: document.getElementById('prisDetaljer'),
+            goToBestilling: document.getElementById('goToBestilling'),
+            kalkulatorView: document.getElementById('kalkulatorView'),
+            bestillingView: document.getElementById('bestillingView'),
+            tilbakeBtn: document.getElementById('tilbakeBtn'),
+            foresporselForm: document.getElementById('foresporselForm'),
+            sendInnForesporsel: document.getElementById('sendInnForesporsel')
         };
 
         function beregntimer() {
@@ -342,11 +493,179 @@
             elements.placeholder.classList.add('hidden');
         }
 
+        function step2Beregn(values) {
+            const prisStruktur = priser[values.tjenestetype];
+            const totalTimer = values.timer * values.antalVektere;
+            const grunnpris = prisStruktur.grunnpris * totalTimer;
+            const akuttKr = values.erAkutt ? (200 * totalTimer) : 0;
+            const nattKr = prisStruktur.nattTillegg * values.nattTimer * values.antalVektere;
+            const helgeKr = prisStruktur.helgTillegg * values.helgeTimer * values.antalVektere;
+            const subtotal = grunnpris + akuttKr + nattKr + helgeKr;
+            const mva = subtotal * 0.25;
+            const total = subtotal + mva;
+            return { grunnpris, akuttKr, nattKr, helgeKr, subtotal, mva, total };
+        }
+
+        function hentStep2Verdier() {
+            const startDato = document.getElementById('step2_startDato').value;
+            const sluttDato = document.getElementById('step2_sluttDato').value;
+            const startTid = document.getElementById('step2_startTid').value;
+            const sluttTid = document.getElementById('step2_sluttTid').value;
+            let timer = 0;
+            if (startDato && sluttDato) {
+                const s = new Date(`${startDato}T${startTid}`);
+                const e = new Date(`${sluttDato}T${sluttTid}`);
+                timer = Math.max(0, (e - s) / (1000 * 60 * 60));
+            }
+            let nattTimer = 0, helgeTimer = 0;
+            if (startDato && sluttDato) {
+                const s = new Date(`${startDato}T${startTid}`);
+                const e = new Date(`${sluttDato}T${sluttTid}`);
+                let c = new Date(s);
+                while (c < e) {
+                    const n = new Date(c);
+                    n.setHours(n.getHours() + 1);
+                    const endH = n > e ? e : n;
+                    const h = c.getHours();
+                    const d = c.getDay();
+                    if (h >= 21 || h < 6) nattTimer += (endH - c) / (1000 * 60 * 60);
+                    if (d === 0 || d === 6) helgeTimer += (endH - c) / (1000 * 60 * 60);
+                    c = endH;
+                }
+            }
+            let erAkutt = false;
+            if (startDato && startTid) {
+                const na = new Date();
+                const s = new Date(`${startDato}T${startTid}:00`);
+                const tf = (s - na) / (1000 * 60 * 60);
+                erAkutt = tf < 72 && tf > 0;
+            }
+            return {
+                tjenestetype: document.getElementById('step2_tjenestetype').value,
+                antalVektere: parseInt(document.getElementById('step2_antalVektere').value || '1'),
+                startDato, sluttDato, startTid, sluttTid, timer, nattTimer, helgeTimer, erAkutt
+            };
+        }
+
+        function oppdaterHiddenFelt(values, calc) {
+            document.getElementById('hidTjenestetype').value = values.tjenestetype;
+            document.getElementById('hidAntall').value = values.antalVektere;
+            document.getElementById('hidStart').value = `${values.startDato} ${values.startTid}`;
+            document.getElementById('hidSlutt').value = `${values.sluttDato} ${values.sluttTid}`;
+            document.getElementById('hidTimer').value = values.timer.toFixed(1);
+            document.getElementById('hidNatt').value = values.nattTimer.toFixed(1);
+            document.getElementById('hidHelg').value = values.helgeTimer.toFixed(1);
+            document.getElementById('hidGrunnpris').value = calc.grunnpris.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('hidAkutt').value = calc.akuttKr.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('hidNattKr').value = calc.nattKr.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('hidHelgeKr').value = calc.helgeKr.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('hidSubtotal').value = calc.subtotal.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('hidMva').value = calc.mva.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('hidTotal').value = calc.total.toLocaleString('nb-NO') + ' kr';
+        }
+
+        function step2Oppdater() {
+            const v = hentStep2Verdier();
+            const calc = step2Beregn(v);
+            let detaljer = `
+                <div class="row">
+                    <span class="text-gray-700">Grunnpris (${v.timer.toFixed(1)} timer × ${v.antalVektere} vakter × ${priser[v.tjenestetype].grunnpris} kr/time):</span>
+                    <span class="row-value text-gray-900">${calc.grunnpris.toLocaleString('nb-NO')} kr</span>
+                </div>
+            `;
+            if (v.erAkutt) {
+                detaljer += `
+                    <div class="row">
+                        <span class="text-orange-600">Akutt oppdrag-tillegg (${(v.timer * v.antalVektere).toFixed(1)} timer × 200 kr/time):</span>
+                        <span class="row-value text-orange-600">+${calc.akuttKr.toLocaleString('nb-NO')} kr</span>
+                    </div>
+                `;
+            }
+            if (v.nattTimer > 0) {
+                detaljer += `
+                    <div class="row">
+                        <span class="text-blue-600">Natt-tillegg (${v.nattTimer.toFixed(1)} timer × ${v.antalVektere} vakter × ${priser[v.tjenestetype].nattTillegg} kr/time):</span>
+                        <span class="row-value text-blue-600">+${calc.nattKr.toLocaleString('nb-NO')} kr</span>
+                    </div>
+                `;
+            }
+            if (v.helgeTimer > 0) {
+                detaljer += `
+                    <div class="row">
+                        <span class="text-purple-600">Helge-tillegg (${v.helgeTimer.toFixed(1)} timer × ${v.antalVektere} vakter × ${priser[v.tjenestetype].helgTillegg} kr/time):</span>
+                        <span class="row-value text-purple-600">+${calc.helgeKr.toLocaleString('nb-NO')} kr</span>
+                    </div>
+                `;
+            }
+            document.getElementById('step2_prisDetaljer').innerHTML = detaljer;
+            document.getElementById('step2_hovedpris').textContent = calc.subtotal.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('step2_inkludertMva').textContent = calc.total.toLocaleString('nb-NO') + ' kr inkl. mva (25%)';
+            document.getElementById('step2_subtotal').textContent = calc.subtotal.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('step2_mva').textContent = calc.mva.toLocaleString('nb-NO') + ' kr';
+            document.getElementById('step2_total').textContent = calc.total.toLocaleString('nb-NO') + ' kr';
+            oppdaterHiddenFelt(v, calc);
+            validateForm();
+        }
+
+        function visBestilling() {
+            const timer = beregntimer();
+            if (!elements.startDato.value || !elements.sluttDato.value || timer <= 0) return;
+            document.getElementById('step2_tjenestetype').value = elements.tjenestetype.value;
+            document.getElementById('step2_antalVektere').value = elements.antalVektere.value;
+            document.getElementById('step2_startDato').value = elements.startDato.value;
+            document.getElementById('step2_sluttDato').value = elements.sluttDato.value;
+            document.getElementById('step2_startTid').value = elements.startTid.value;
+            document.getElementById('step2_sluttTid').value = elements.sluttTid.value;
+            elements.kalkulatorView.classList.add('hidden');
+            elements.bestillingView.classList.remove('hidden');
+            step2Oppdater();
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function validateForm() {
+            const form = elements.foresporselForm;
+            const samtykke = document.getElementById('samtykke');
+            const v = hentStep2Verdier();
+            const ok = form && form.checkValidity && form.checkValidity() && samtykke.checked && v.timer > 0;
+            if (elements.sendInnForesporsel) elements.sendInnForesporsel.disabled = !ok;
+        }
+
         elements.startDato.addEventListener('change', oppdater);
         elements.startTid.addEventListener('change', oppdater);
         elements.sluttDato.addEventListener('change', oppdater);
         elements.sluttTid.addEventListener('change', oppdater);
         elements.genererBtn.addEventListener('click', genererTilbud);
+        if (elements.goToBestilling) elements.goToBestilling.addEventListener('click', (e) => { e.preventDefault(); visBestilling(); });
+        if (elements.tilbakeBtn) elements.tilbakeBtn.addEventListener('click', (e) => { e.preventDefault(); elements.bestillingView.classList.add('hidden'); elements.kalkulatorView.classList.remove('hidden'); window.scrollTo(0,0); });
+        ;['step2_tjenestetype','step2_antalVektere','step2_startDato','step2_sluttDato','step2_startTid','step2_sluttTid'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) { el.addEventListener('change', step2Oppdater); el.addEventListener('input', step2Oppdater); }
+        });
+        const samtykkeEl = document.getElementById('samtykke');
+        if (samtykkeEl) samtykkeEl.addEventListener('change', validateForm);
+        if (elements.foresporselForm) elements.foresporselForm.addEventListener('submit', () => { step2Oppdater(); });
+
+        // Kundetype toggle for bedriftfelt
+        const ktBedrift = document.getElementById('ktBedrift');
+        const ktPrivat = document.getElementById('ktPrivat');
+        const bedriftFields = document.getElementById('bedriftFields');
+        function toggleBedriftFields() {
+            const show = ktBedrift && ktBedrift.checked;
+            if (bedriftFields) bedriftFields.style.display = show ? '' : 'none';
+            ['firmaNavn','orgnr','firmaAdresse'].forEach(id => {
+                const el = document.getElementById(id);
+                if (el) el.required = !!show; // make required for bedrift
+            });
+        }
+        if (ktBedrift) ktBedrift.addEventListener('change', () => { toggleBedriftFields(); validateForm(); });
+        if (ktPrivat) ktPrivat.addEventListener('change', () => { toggleBedriftFields(); validateForm(); });
+        toggleBedriftFields();
+
+        // Validate on contact field input
+        ['serviceAdresse','kontaktNavn','kontaktEpost','kontaktTelefon','firmaNavn','orgnr','firmaAdresse'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.addEventListener('input', validateForm);
+        });
 
         oppdater();
     </script>
