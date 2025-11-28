@@ -487,7 +487,7 @@
                 `;
             }
 
-            if (nattOgHelge.nattTimer > 0) {
+            if (nattOgHelge.nattTimer > 0 && prisStruktur.nattTillegg) {
                 detaljer += `
                     <div class="row">
                         <span class="text-blue-600">Natt-tillegg (${nattOgHelge.nattTimer.toFixed(1)} timer × ${antalVektere} vektere × ${prisStruktur.nattTillegg} kr/time):</span>
@@ -496,7 +496,7 @@
                 `;
             }
 
-            if (nattOgHelge.helgeTimer > 0) {
+            if (nattOgHelge.helgeTimer > 0 && prisStruktur.helgTillegg) {
                 detaljer += `
                     <div class="row">
                         <span class="text-purple-600">Helge-tillegg (${nattOgHelge.helgeTimer.toFixed(1)} timer × ${antalVektere} vektere × ${prisStruktur.helgTillegg} kr/time):</span>
@@ -523,8 +523,8 @@
             const totalTimer = values.timer * values.antalVektere;
             const grunnpris = prisStruktur.grunnpris * totalTimer;
             const akuttKr = values.erAkutt ? (600) : 0;
-            const nattKr = prisStruktur.nattTillegg * values.nattTimer * values.antalVektere;
-            const helgeKr = prisStruktur.helgTillegg * values.helgeTimer * values.antalVektere;
+            const nattKr = (prisStruktur.nattTillegg && prisStruktur.nattTillegg > 0) ? (prisStruktur.nattTillegg * values.nattTimer * values.antalVektere) : 0;
+            const helgeKr = (prisStruktur.helgTillegg && prisStruktur.helgTillegg > 0) ? (prisStruktur.helgTillegg * values.helgeTimer * values.antalVektere) : 0;
             const subtotal = grunnpris + akuttKr + nattKr + helgeKr;
             const mva = subtotal * 0.25;
             const total = subtotal + mva;
@@ -612,7 +612,7 @@
                     </div>
                 `;
             }
-            if (v.nattTimer > 0) {
+            if (v.nattTimer > 0 && priser[v.tjenestetype].nattTillegg) {
                 detaljer += `
                     <div class="row">
                         <span class="text-blue-600">Natt-tillegg (${v.nattTimer.toFixed(1)} timer × ${v.antalVektere} vektere × ${priser[v.tjenestetype].nattTillegg} kr/time):</span>
@@ -620,7 +620,7 @@
                     </div>
                 `;
             }
-            if (v.helgeTimer > 0) {
+            if (v.helgeTimer > 0 && priser[v.tjenestetype].helgTillegg) {
                 detaljer += `
                     <div class="row">
                         <span class="text-purple-600">Helge-tillegg (${v.helgeTimer.toFixed(1)} timer × ${v.antalVektere} vektere × ${priser[v.tjenestetype].helgTillegg} kr/time):</span>
