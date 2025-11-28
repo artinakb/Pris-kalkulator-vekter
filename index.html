@@ -238,7 +238,7 @@
                             <input id="kontaktNavn" name="Navn" placeholder="Fornavn Etternavn" required>
                         </div>
                         <div class="grid-cols-2">
-                            <input id="kontaktEpost" type="email" name="E-post" placeholder="din@epost.no" required>
+                            <input id="kontaktEpost" type="email" name="email" placeholder="din@epost.no" required>
                             <input id="kontaktTelefon" name="Telefon" placeholder="+47 123 45 678" required>
                         </div>
                         <div class="checkbox-group" style="margin-top:1rem;">
@@ -250,6 +250,7 @@
                     <input type="hidden" name="_subject" value="Ny forespørsel fra priskalkulator">
                     <input type="hidden" name="_template" value="table">
                     <input type="hidden" name="_captcha" value="false">
+                    <input type="hidden" id="hidReplyTo" name="_replyto" value="">
 
                     <input type="hidden" id="hidTjenestetype" name="Tjenestetype">
                     <input type="hidden" id="hidAntall" name="Antall_vakter">
@@ -564,6 +565,12 @@
             document.getElementById('hidTotal').value = calc.total.toLocaleString('nb-NO') + ' kr';
         }
 
+        function oppdaterReplyTo() {
+            const emailEl = document.getElementById('kontaktEpost');
+            const replyEl = document.getElementById('hidReplyTo');
+            if (emailEl && replyEl) replyEl.value = emailEl.value || '';
+        }
+
         function step2Oppdater() {
             const v = hentStep2Verdier();
             const calc = step2Beregn(v);
@@ -604,6 +611,7 @@
             document.getElementById('step2_mva').textContent = calc.mva.toLocaleString('nb-NO') + ' kr';
             document.getElementById('step2_total').textContent = calc.total.toLocaleString('nb-NO') + ' kr';
             oppdaterHiddenFelt(v, calc);
+            oppdaterReplyTo();
             validateForm();
         }
 
@@ -664,7 +672,9 @@
         // Validate on contact field input
         ['serviceAdresse','kontaktNavn','kontaktEpost','kontaktTelefon','firmaNavn','orgnr','firmaAdresse'].forEach(id => {
             const el = document.getElementById(id);
-            if (el) el.addEventListener('input', validateForm);
+            if (el) {
+                el.addEventListener('input', () => { oppdaterReplyTo(); validateForm(); });
+            }
         });
 
         oppdater();
